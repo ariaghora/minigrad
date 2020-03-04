@@ -107,8 +107,8 @@ def add(a, b):
 
 def sub(a, b):
     def backward_sub(dy):
-        if a.requires_grad: a.grad += dy
-        if b.requires_grad: b.grad -= dy
+        if a.requires_grad: a.grad += unbroadcast_to(dy, a.shape)
+        if b.requires_grad: b.grad -= unbroadcast_to(dy, b.shape)
     res = Tensor(a.data - b.data, is_leaf=False, requires_grad=parent_requires_graph([a, b]))    
     res.backward_func = backward_sub
     res.prev.extend([a, b])
@@ -116,8 +116,8 @@ def sub(a, b):
 
 def mul(a, b):
     def backward_mul(dy):
-        if a.requires_grad: a.grad += dy * b.data
-        if b.requires_grad: b.grad += dy * a.data
+        if a.requires_grad: a.grad += unbroadcast_to(dy * b.data, a.shape)
+        if b.requires_grad: b.grad += unbroadcast_to(dy * a.data, b.shape)
     res = Tensor(a.data * b.data, is_leaf=False, requires_grad=parent_requires_graph([a, b]))    
     res.backward_func = backward_mul
     res.prev.extend([a, b])
